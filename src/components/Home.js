@@ -1,5 +1,12 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { connect } from 'react-redux';
+
+import { 
+    fetchPopularMovies,
+    fetchSearchMovies
+ } from '../actions';
+
 import { 
     POPULAR_BASE_URL,
     SEARCH_BASE_URL,
@@ -15,55 +22,57 @@ import MovieThumb from './elements/MovieThumb';
 import LoadMoreBtn from './elements/LoadMoreBtn';
 import Spinner from './elements/Spinner';
 
-import { useHomeFetch } from '../hooks/useHomeFetch';
-
 import NoImage from './images/no_image.jpg';
 
-const Home = () => {
-    
-    const [searchTerm, setSearchTerm] = useState('');
-
-    const [ 
-        {
-            // Note: This is multi level destructuring.
-            state : {heroImage, currentPage, totalPages, movies}, 
-            error
-        },
-        fetchMovies
-    ] = useHomeFetch(searchTerm);
-
+const Home = ( 
+    {   
+        fetchPopularMovies, 
+        fetchSearchMovies,
+        popularMovies, 
+        searchMovies,
+        heroImage,
+        currentPage,
+        totalPages,
+        searchTerm,
+        error 
+    } ) => 
+{
+    useEffect(() => {
+        fetchPopularMovies(POPULAR_BASE_URL);
+    }, []);
 
     // Callback function when user searches something. 
-    const searchMovies = search => {
-        const endpoint 
-            = search 
-                ? `${SEARCH_BASE_URL}${search}` 
-                : POPULAR_BASE_URL;
-
-        setSearchTerm(search);
-
-        fetchMovies(endpoint);
+    const searchMoviesCallback = searchTerm => {
+        const endPoint = `${SEARCH_BASE_URL}${searchTerm}`;
+        fetchSearchMovies(endPoint, searchTerm);
     };
 
     // Callback function when "Load More" is clicked.
     const loadMoreMovies = () => {
-        const searchEndPoint = 
+
+        const searchMoviesEndPoint = 
             `${SEARCH_BASE_URL}${searchTerm}&page=${currentPage + 1}`;
 
-        const popularEndPoint = 
+        const popularMoviesEndPoint = 
             `${POPULAR_BASE_URL}&page=${currentPage + 1}`;
 
-        const endPoint = searchTerm ? searchEndPoint : popularEndPoint;
-
-        fetchMovies(endPoint);
+        if (searchTerm) {
+            fetchSearchMovies(searchMoviesEndPoint, searchTerm);
+        }
+        else {
+            fetchPopularMovies(popularMoviesEndPoint);
+        }
     };
+
+    const isSearchEnabled = searchTerm ? true : false;
+    const movies = isSearchEnabled ? searchMovies : popularMovies;
 
     if (error) return <div>Something went wrong...</div>;
     if (!movies[0]) return <Spinner />;
 
     return (
         <React.Fragment>
-            { !searchTerm && (
+            { !isSearchEnabled && (
                 <HeroImage 
                         image={`${IMAGE_BASE_URL}${BACKDROP_SIZE}${heroImage.backdrop_path}`}
                         title={heroImage.title}             
@@ -71,9 +80,9 @@ const Home = () => {
                 />
             )} 
 
-            <SearchBar callback={searchMovies} />
+            <SearchBar callback={searchMoviesCallback} />
 
-            <Grid header={searchTerm ? 'Search Results' : 'Popular Movies'}>
+            <Grid header={isSearchEnabled ? 'Search Results' : 'Popular Movies'}>
                 {movies.map(movie => {
                     return (
                         <MovieThumb
@@ -97,4 +106,28 @@ const Home = () => {
     );
 }
 
-export default Home;
+const mapStateToProps = state => {
+
+    const currentPage = state.searchMovies.movies && state.searchMovies.movies.length > 0 
+                        ? state.searchMovies.currentPage
+                        : state.popularMovies.currentPage;
+
+    const totalPages = state.searchMovies.movies && state.searchMovies.movies.length > 0 
+                        ? state.searchMovies.totalPages
+                        : state.popularMovies.totalPages;
+
+    return {
+        popularMovies: state.popularMovies.movies,
+        searchMovies: state.searchMovies.movies,
+        error: state.popularMovies.error || state.searchMovies.error,   
+        heroImage: state.heroImage,
+        currentPage,
+        totalPages,
+        searchTerm: state.searchMovies.searchTerm
+    }
+};
+
+export default connect(
+    mapStateToProps, 
+    { fetchPopularMovies, fetchSearchMovies }
+)(Home);

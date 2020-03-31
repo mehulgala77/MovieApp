@@ -2,6 +2,10 @@
 import { useState, useEffect } from 'react';
 import { POPULAR_BASE_URL } from '../config';
 
+// Note: This file is now not used in production Since Home component is now using Redux to 
+// manage state. However, keeping this file as reference for how state to be managed using
+// hooks.
+
 export const useHomeFetch = (searchTerm) => {
     // States
     const [state, setState] = useState({ movies: [] });
@@ -47,7 +51,7 @@ export const useHomeFetch = (searchTerm) => {
         }
 
     }, []);
-    
+
     // Note: Setting new List of Home page movies in the session storage whenever it is changed.
     // Note: The reason why we are storing this in session storage is because popular movies
     // will keep on changing over time.
