@@ -5,7 +5,7 @@ import { connect } from 'react-redux';
 import { 
     fetchPopularMovies,
     fetchSearchMovies
- } from '../actions';
+} from '../actions';
 
 import { 
     POPULAR_BASE_URL,

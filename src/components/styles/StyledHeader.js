@@ -18,7 +18,7 @@ export const StyledHeader = styled.div`
     }
   }
 `;
-
+ 
 export const StyledRMDBLogo = styled.img`
   width: 250px;
   margin-top: 20px;

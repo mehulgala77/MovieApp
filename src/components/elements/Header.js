@@ -10,7 +10,7 @@ import {
     StyledRMDBLogo,
     StyledTMDBLogo
 } from '../styles/StyledHeader';
-
+ 
 const Header = () => {
     return (
         <StyledHeader>

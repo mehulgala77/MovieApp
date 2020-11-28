@@ -8,7 +8,7 @@ import Grid from './elements/Grid';
 import Spinner from './elements/Spinner';
 
 import { useMovieFetch } from '../hooks/useMovieFetch';
-
+ 
 const Movie = ( {movieId} ) => {
 
     const [ {movie, loading, error} ] = useMovieFetch(movieId);
@@ -34,5 +34,5 @@ const Movie = ( {movieId} ) => {
         </React.Fragment>
     );
 };
-
+ 
 export default Movie;
